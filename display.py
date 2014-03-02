@@ -18,6 +18,88 @@ win.border(0)
 win.refresh()
 colcount = 2
 
+class player:
+			
+	def __init__(self,x=1,y=1,color=4,speed=0):
+		self.x = x
+		self.y = y
+		self.color = color
+		self.speed = speed
+		self.ticks = 0
+		self.body = "X"
+		self.head = "*"
+		
+	def fall(self):
+		self.speed = ticks + self.speed
+		self.ticks = self.ticks + 1
+	
+	def stand(self,plat):
+		self.speed = plat.speed
+		
+class plat:
+
+	def __init__(self,val="_",x=1,y=1,color=3,speed=1):
+		self.val = val
+		self.x = x
+		self.y = y
+		self.color = color
+		self.speed = speed
+		
+	def tick(self):
+		self.y = self.y - self.speed
+
+class indoor:	#Coordinates are for the upper half of the door
+
+	def __init__(self,y=0,x=1):
+		self.x = x
+		self.y = y
+		self.upperhalf = "/"
+		self.lowerhalf = "\\"
+
+class outdoor:	#Coordinates are for the upper half of the door
+		
+	def __init__(self,y=0,x=0):
+		self.x = x
+		self.y = y
+		self.upperhalf = "\\"
+		self.lowerhalf = "/"
+
+		
+ind = indoor()
+outd = outdoor()
+bob = player()
+firstplat = plat()
+
+holybits = [(bob.y,bob.x),(firstplat.y,firstplat.x)]
+		
+def levelbits():
+
+	global ind
+	global outd
+	global bob
+	global firstplat
+	global holybits
+	
+	ind.x = 0
+	ind.y = 1
+	win.addch(ind.y,ind.x,ind.upperhalf)
+	win.addch(ind.y+1,ind.x,ind.lowerhalf)
+	
+	firstplat.x = 1
+	firstplat.y = 2
+	
+	outd.x = x-1
+	outd.y = random.randrange(1,y-3)
+	win.addch(outd.y,outd.x,outd.upperhalf)
+	win.addch(outd.y+1,outd.x,outd.lowerhalf)
+	
+	bob.y = 2
+	bob.x = 1
+	win.addch(bob.y,bob.x,bob.body,curses.color_pair(4))
+	win.addch(bob.y-1,bob.x,bob.head,curses.color_pair(4))
+	win.refresh()
+	holybits = [(bob.y,bob.x),(bob.y-1,bob.x),(firstplat.y,firstplat.x)]
+
 ab = map(chr, range(97, 123))
 class col(list):
 
@@ -40,7 +122,10 @@ class col(list):
 			#print self
 			win.move(y,x)
 			for i in self:
-				win.addstr(y,x,self[self.index(i)].val,curses.color_pair(1))
+				if ((y,x) in holybits):
+					pass
+				else:
+					win.addstr(y,x,self[self.index(i)].val,curses.color_pair(1))
 				try:
 					y += 1
 					win.move(y,x)
@@ -53,7 +138,10 @@ class col(list):
 			y = 1
 			x = self.pos
 			for i in self:
-				win.addstr(y,x,self[self.index(i)].val,curses.color_pair(1))
+				if ((y,x) in holybits):
+					pass
+				else:
+					win.addstr(y,x,self[self.index(i)].val,curses.color_pair(1))
 				try:
 					y += 1
 					win.move(y,x)
@@ -72,57 +160,7 @@ class symbol:
 		else:
 			self.color = 1
 
-class player:
-			
-	def __init__(self,val="X",x=1,y=1,color=4,speed=0):
-		self.val = val
-		self.x = x
-		self.y = y
-		self.color = color
-		self.speed = speed
-		self.ticks = 0
-		
-	def fall(self):
-		self.speed = ticks + self.speed
-		self.ticks = self.ticks + 1
-	
-	def stand(self,plat):
-		self.speed = plat.speed
-	'''
-	def tick(self):
-		if win.inch(self.y+1,self.x) == "_":
-			if 
-			self.stand(self,plat)
-		else:
-			self.fall(self)
-	'''
-class plat:
 
-	def __init__(self,val="_",x=1,y=1,color=3,speed=1):
-		self.val = val
-		self.x = x
-		self.y = y
-		self.color = color
-		self.speed = speed
-		
-	def tick(self):
-		self.y = self.y - self.speed
-
-class indoor:	#Coordinates are for the upper half of the door
-
-	def init(self,y=0,x=0):
-		self.x = x
-		self.y = y
-		self.upperhalf = "/"
-		self.lowerhalf = "\\"
-
-class outdoor:	#Coordinates are for the upper half of the door
-		
-	def init(self,y=0,x=0):
-		self.x = x
-		self.y = y
-		self.upperhalf = "\\"
-		self.lowerhalf = "/"
 class msg:
 	
 	def __init__(self,y=0,x=0,speed=0.1,txt="Test String",align='right'):
