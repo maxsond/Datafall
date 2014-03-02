@@ -1,16 +1,22 @@
 import time
 import curses
 import random
+import sys
 from winsize import x, y
 x = x()
 y = y()
 win = curses.initscr()
+curses.curs_set(0)
 curses.start_color()
 print curses.can_change_color()
 curses.init_color(2, 256, 204, 0)
 curses.init_pair(1, 2, curses.COLOR_BLACK)
+curses.init_pair(2,curses.COLOR_BLUE,curses.COLOR_BLACK)
+curses.init_pair(3,curses.COLOR_WHITE,curses.COLOR_BLACK)
+curses.init_pair(4,curses.COLOR_MAGENTA,curses.COLOR_BLACK)
 win.border(0)
 win.refresh()
+colcount = 2
 
 ab = map(chr, range(97, 123))
 class col(list):
@@ -20,12 +26,14 @@ class col(list):
 		self.pos = pos	#The column index
 		self.winx = winx
 		self.winy = winy
+		self.full = False
 		
 	def update(self):
 		self.insert(0,symbol(random.choice(ab)))
 	
-	def dis(self):
-		while len(self) <= self.winy-3:	#Fill the col
+	def filtick(self):
+		global colcount
+		if len(self) <= self.winy-3:	#Fill the col
 			y = 1
 			x = self.pos
 			self.update()
@@ -39,10 +47,8 @@ class col(list):
 				except:
 					pass
 			win.move(0,self.pos)
-			win.refresh()
-			time.sleep(0.3)
-			
-		while True:	#When the col's full
+		else: 
+			self.full = True
 			self.insert(0,self.pop())	#Rotate by 1
 			y = 1
 			x = self.pos
@@ -53,20 +59,70 @@ class col(list):
 					win.move(y,x)
 				except:
 					pass
-			win.refresh()
-			time.sleep(0.1)
-				
+
 class symbol:
 	
-	def __init__(self,val=random.choice(ab),color="00CC00"):
+	def __init__(self,val=random.choice(ab),color=1):
 		self.val = val
 		self.color = color
+		
+	def color(self):
+		if random.randrange(1,5) == 1:
+			self.color = 2
+		else:
+			self.color = 1
 
 class player:
 			
-	def __init__(self,val="X")
+	def __init__(self,val="X",x=1,y=1,color=4,speed=0):
 		self.val = val
+		self.x = x
+		self.y = y
+		self.color = color
+		self.speed = speed
+		self.ticks = 0
+		
+	def fall(self):
+		self.speed = ticks + self.speed
+		self.ticks = self.ticks + 1
+	
+	def stand(self,plat):
+		self.speed = plat.speed
+	'''
+	def tick(self):
+		if win.inch(self.y+1,self.x) == "_":
+			if 
+			self.stand(self,plat)
+		else:
+			self.fall(self)
+	'''
+class plat:
 
+	def __init__(self,val="_",x=1,y=1,color=3,speed=1):
+		self.val = val
+		self.x = x
+		self.y = y
+		self.color = color
+		self.speed = speed
+		
+	def tick(self):
+		self.y = self.y - self.speed
+
+class indoor:	#Coordinates are for the upper half of the door
+
+	def init(self,y=0,x=0):
+		self.x = x
+		self.y = y
+		self.upperhalf = "/"
+		self.lowerhalf = "\\"
+
+class outdoor:	#Coordinates are for the upper half of the door
+		
+	def init(self,y=0,x=0):
+		self.x = x
+		self.y = y
+		self.upperhalf = "\\"
+		self.lowerhalf = "/"
 class msg:
 	
 	def __init__(self,y=0,x=0,speed=0.1,txt="Test String",align='right'):
