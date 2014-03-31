@@ -3,7 +3,7 @@ import curses
 import random
 import sys
 from winsize import x, y
-import manager
+#import manager
 import threadz
 notdead = True
 x = x()
