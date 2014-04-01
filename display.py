@@ -94,6 +94,7 @@ class player:
 		global platlist
 		if self.x < x-2:
 			self.x += 1
+			self.loc = (self.y,self.x)
 			try:
 				win.addch(self.y,self.x,self.body,curses.color_pair(4))
 				win.addch(self.y-1,self.x,self.head,curses.color_pair(4))
