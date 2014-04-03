@@ -28,6 +28,10 @@ holybits = []
 platlist = []
 #win.addstr(curses.keyname(262))
 
+def platinit(p):
+	platlist.append(p.y,p.x)
+	platcases.append(p)
+
 def restart():
 	notdead = False
 	win.clear()
@@ -69,36 +73,45 @@ class player:
 		#Speed should be added to self.Y in order to go up, 
 		#so it should typically be a negative number when standing on a platform
 		#And positive when falling
-		try:
-			win.addch(self.y,self.x,' ',curses.color_pair(3))
-			win.addch(self.y-1,self.x,' ',curses.color_pair(4))
-			self.y = self.y + self.speed
-		except:
-			pass
-		try:
-			win.addch(self.y,self.x,self.body,curses.color_pair(3))
-			win.addch(self.y-1,self.x,self.head,curses.color_pair(4))
+		try:	#This draws the character falling
 			self.speed = self.speed + self.ticks
 			self.ticks = self.ticks + 1
+			self.y = self.y + self.speed
+			win.addch(self.y,self.x,' ',curses.color_pair(3))
+			win.addch(self.y-1,self.x,' ',curses.color_pair(4))
+		except:
+			death()		
+		'''
+		try:
+			pass
+			#win.addch(self.y,self.x,self.body,curses.color_pair(3))
+			#win.addch(self.y-1,self.x,self.head,curses.color_pair(4))
 		except:
 			death()
 			#sys.exit()
+		'''
 	
 	def stand(self,platform):
+		win.addstr(winy-7,7,"Standing")
+		self.ticks = 0
 		if self.speed + platform.speed > 15:
 			death()
 		else:
+			win.addstr(winy-6,7,str(platform.speed))
 			self.speed = -(platform.speed)
 			
 	def move(self):
+		bouncyplat.tick()
+		win.addstr(winy-7,7,"        ")
 		global platlist
 		if self.x < x-2:
 			self.x += 1
+			self.loc = (self.y,self.x)
 			try:
-				win.addch(self.y,self.x,self.body,curses.color_pair(4))
-				win.addch(self.y-1,self.x,self.head,curses.color_pair(4))
-				win.addch(self.y,self.x-1,' ')
-				win.addch(self.y-1,self.x-1,' ')
+				#win.addch(self.y,self.x,self.body,curses.color_pair(4))
+				#win.addch(self.y-1,self.x,self.head,curses.color_pair(4))
+				#win.addch(self.y,self.x-1,' ')
+				#win.addch(self.y-1,self.x-1,' ')
 				win.addch(2,1,'_')
 				win.refresh()
 			except:
@@ -107,18 +120,40 @@ class player:
 			pass
 		win.addstr(winy-2,7,str(platlist))
 		win.addstr(winy-4,7,str((self.y,self.x)))
-		if self.loc in platlist:
+		win.addstr(winy-5,7,"Checking location")
+		if (self.y,self.x) in platlist:
 			self.standing = True
-			win.addstr(winy-3,7,"True")	
-			bobplatindex = platlist.index(self.loc)
+			bobplatindex = platlist.index((self.y,self.x))
 			bobplat = platcases[bobplatindex]
 			self.stand(bobplat)
+			win.addstr(winy-3,7,"True")
+			win.addstr(winy-5,7,"                 ")
+			win.addstr(winy-5,7,"Yep")
 		else:
 			win.addstr(winy-3,7,"False")
 			#win.addstr(winy-4,7,"False")
 			self.standing = False
 			self.fall()
+			win.addstr(winy-5,7,"                 ")
+			win.addstr(winy-5,7,"Nope")
 			pass
+		win.addstr(winy-2,7,str(platlist))
+		win.addstr(winy-4,7,str((self.y,self.x)))
+		win.addstr(winy-5,7,"Checking location")
+		if (self.y,self.x) in platlist:
+			self.standing = True
+			bobplatindex = platlist.index((self.y,self.x))
+			bobplat = platcases[bobplatindex]
+			self.stand(bobplat)
+			win.addstr(winy-3,7,"True")
+			win.addstr(winy-5,7,"                 ")
+			win.addstr(winy-5,7,"Yep")
+		else:
+			win.addstr(winy-3,7,"False")
+			#win.addstr(winy-4,7,"False")
+			self.standing = False
+			win.addstr(winy-5,7,"                 ")
+			win.addstr(winy-5,7,"Nope")
 		#win.addstr(0,0,str((self.y,self.x)))
 		#self.tick()
 	'''		
@@ -141,6 +176,7 @@ class plat:
 		#holybits.append((y,x))
 		
 	def tick(self):
+		platlist.pop(platlist.index((self.y,self.x)))
 		'''This returns the plat to the bottom of the screen'''
 		if self.y <= 2:
 			self.lasty = self.y
@@ -170,11 +206,13 @@ class plat:
 			'''
 			#win.addch(self.y,self.x,"_",curses.color_pair(3))
 			self.lasty = self.y
-			win.addch(self.y,self.x," ")
+			win.addch(self.y,self.x,"_")
 			self.y = self.y - self.speed
 			#holybits.append((self.y,self.x))
 			#win.refresh()
-
+		platlist.append((self.y,self.x))
+bouncyplat = plat(6,8,1)
+			
 class indoor:	#Coordinates are for the upper half of the door
 
 	def __init__(self,y=0,x=1):
@@ -210,6 +248,7 @@ def levelbits():
 	global lastplat
 	global testplats
 	global platcases
+	global bouncyplat
 	#global holybits
 	
 	for i in range(2,5):
@@ -219,7 +258,6 @@ def levelbits():
 	for i in testplats:
 		platlist.append((int(i.y),int(i.x)))
 		platcases.append(i)
-	bouncyplat = plat(8,6,10)
 	platcases.append(bouncyplat)
 	platlist.append((bouncyplat.y,bouncyplat.x))
 	win.addch(bouncyplat.y,bouncyplat.x,"_")
