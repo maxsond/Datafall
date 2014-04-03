@@ -172,7 +172,7 @@ class plat:
 			#win.addch(self.y,self.x,"_",curses.color_pair(3))
 			self.lasty = self.y
 			win.addch(self.y,self.x," ")
-			self.y = self.y - self.speed
+			self.y -= self.speed
 			#holybits.append((self.y,self.x))
 			#win.refresh()
 
