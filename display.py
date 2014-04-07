@@ -74,6 +74,9 @@ class player:
 		#so it should typically be a negative number when standing on a platform
 		#And positive when falling
 		try:	#This draws the character falling
+			self.standing = False
+			win.addch(self.y,self.x," ")
+			win.addch(self.y-1,self.x," ")
 			self.speed = self.speed + self.ticks
 			self.ticks = self.ticks + 1
 			self.y = self.y + self.speed
@@ -92,17 +95,23 @@ class player:
 		'''
 	
 	def stand(self,platform):
-		win.addstr(winy-7,7,"Standing")
+		self.standing = True
+		#win.addstr(winy-7,7,"Standing")
+		win.addch(self.y,self.x," ")
+		win.addch(self.y-1,self.x," ")
 		self.ticks = 0
 		if self.speed + platform.speed > 15:
 			death()
 		else:
-			win.addstr(winy-6,7,str(platform.speed))
-			self.speed = -(platform.speed)
+			if self.speed > 0:
+				#win.addstr(winy-6,7,str(platform.speed))
+				self.speed = -(platform.speed)
 			
 	def move(self):
-		bouncyplat.tick()
-		win.addstr(winy-7,7,"        ")
+		#bouncyplat.tick()
+		#win.addstr(winy-7,7,"        ")
+		win.addch(self.y,self.x," ")
+		win.addch(self.y-1,self.x," ")
 		global platlist
 		if self.x < x-2:
 			self.x += 1
@@ -118,42 +127,42 @@ class player:
 				pass
 		else:
 			pass
-		win.addstr(winy-2,7,str(platlist))
-		win.addstr(winy-4,7,str((self.y,self.x)))
-		win.addstr(winy-5,7,"Checking location")
+		#win.addstr(winy-2,7,str(platlist))
+		#win.addstr(winy-4,7,str((self.y,self.x)))
+		#win.addstr(winy-5,7,"Checking location")
 		if (self.y,self.x) in platlist:
 			self.standing = True
 			bobplatindex = platlist.index((self.y,self.x))
 			bobplat = platcases[bobplatindex]
 			self.stand(bobplat)
-			win.addstr(winy-3,7,"True")
-			win.addstr(winy-5,7,"                 ")
-			win.addstr(winy-5,7,"Yep")
+		#	win.addstr(winy-3,7,"True")
+		#	win.addstr(winy-5,7,"                 ")
+		#	win.addstr(winy-5,7,"Yep")
 		else:
-			win.addstr(winy-3,7,"False")
+		#	win.addstr(winy-3,7,"False")
 			#win.addstr(winy-4,7,"False")
 			self.standing = False
 			self.fall()
-			win.addstr(winy-5,7,"                 ")
-			win.addstr(winy-5,7,"Nope")
+		#	win.addstr(winy-5,7,"                 ")
+		#	win.addstr(winy-5,7,"Nope")
 			pass
-		win.addstr(winy-2,7,str(platlist))
-		win.addstr(winy-4,7,str((self.y,self.x)))
-		win.addstr(winy-5,7,"Checking location")
+		#win.addstr(winy-2,7,str(platlist))
+		#win.addstr(winy-4,7,str((self.y,self.x)))
+		#win.addstr(winy-5,7,"Checking location")
 		if (self.y,self.x) in platlist:
 			self.standing = True
 			bobplatindex = platlist.index((self.y,self.x))
 			bobplat = platcases[bobplatindex]
 			self.stand(bobplat)
-			win.addstr(winy-3,7,"True")
-			win.addstr(winy-5,7,"                 ")
-			win.addstr(winy-5,7,"Yep")
+		#	win.addstr(winy-3,7,"True")
+		#	win.addstr(winy-5,7,"                 ")
+		#	win.addstr(winy-5,7,"Yep")
 		else:
-			win.addstr(winy-3,7,"False")
+		#	win.addstr(winy-3,7,"False")
 			#win.addstr(winy-4,7,"False")
 			self.standing = False
-			win.addstr(winy-5,7,"                 ")
-			win.addstr(winy-5,7,"Nope")
+		#	win.addstr(winy-5,7,"                 ")
+		#	win.addstr(winy-5,7,"Nope")
 		#win.addstr(0,0,str((self.y,self.x)))
 		#self.tick()
 	'''		
@@ -176,7 +185,9 @@ class plat:
 		#holybits.append((y,x))
 		
 	def tick(self):
+		global bob
 		platlist.pop(platlist.index((self.y,self.x)))
+		'''This returns the plat to the bottom of the screen'''
 		'''This returns the plat to the bottom of the screen'''
 		if self.y <= 2:
 			self.lasty = self.y
@@ -206,12 +217,18 @@ class plat:
 			'''
 			#win.addch(self.y,self.x,"_",curses.color_pair(3))
 			self.lasty = self.y
+			win.addch(self.y,self.x," ")
+			self.y -= self.speed
+		platlist.insert(platcases.index(self),(self.y,self.x))
+		try:
 			win.addch(self.y,self.x,"_")
-			self.y = self.y - self.speed
-			#holybits.append((self.y,self.x))
-			#win.refresh()
-		platlist.append((self.y,self.x))
-bouncyplat = plat(6,8,1)
+		except:
+			pass
+		if (self.y,self.x) == (bob.y,bob.x):
+			bob.stand(self)
+			win.addch(bob.y-1,bob.x,bob.head,curses.color_pair(4))
+			win.refresh()
+#bouncyplat = plat(6,8,1)
 			
 class indoor:	#Coordinates are for the upper half of the door
 
@@ -251,16 +268,16 @@ def levelbits():
 	global bouncyplat
 	#global holybits
 	
-	for i in range(2,5):
-		testplats.append(plat(i,2,0))
-	for i in testplats:
-		win.addch(i.y,i.x,"_")
-	for i in testplats:
-		platlist.append((int(i.y),int(i.x)))
-		platcases.append(i)
-	platcases.append(bouncyplat)
-	platlist.append((bouncyplat.y,bouncyplat.x))
-	win.addch(bouncyplat.y,bouncyplat.x,"_")
+	#for i in range(2,5):
+	#	testplats.append(plat(i,2,0))
+	#for i in testplats:
+	#	win.addch(i.y,i.x,"_")
+	#for i in testplats:
+	#	platlist.append((int(i.y),int(i.x)))
+	#	platcases.append(i)
+	#platcases.append(bouncyplat)
+	#platlist.append((bouncyplat.y,bouncyplat.x))
+	#	win.addch(bouncyplat.y,bouncyplat.x,"_")
 			
 		
 	
@@ -283,8 +300,9 @@ def levelbits():
 	
 	bob.y = 2
 	bob.x = 1
-	win.addch(bob.y,bob.x,bob.body,curses.color_pair(3)) #Should be pair 3 when standing still, 4 when falling
-	win.addch(bob.y-1,bob.x,bob.head,curses.color_pair(3))
+	bob.standing = True
+	#win.addch(bob.y,bob.x,bob.body,curses.color_pair(3)) #Should be pair 3 when standing still, 4 when falling
+	#win.addch(bob.y-1,bob.x,bob.head,curses.color_pair(3))
 	win.refresh()
 	#holybits = [(bob.y,bob.x),(bob.y-1,bob.x),(firstplat.y,firstplat.x)]
 	platlist.append((firstplat.y,firstplat.x))
@@ -419,7 +437,7 @@ def inp(msg):
 def test():
 	time.sleep(0.5)
 def tick():
-	win.addstr(1,1,str(bob.standing))
+	#win.addstr(1,1,str(bob.standing))
 	if notdead:
 		for i in threadz.plats:
 			try:
@@ -438,8 +456,12 @@ def tick():
 		win.addch(outd.y+1,outd.x,outd.lowerhalf)
 		win.addch(outd.y,outd.x,outd.upperhalf)
 		try:
-			win.addch(bob.y,bob.x,bob.body)
-			win.addch(bob.y-1,bob.x,bob.head)
+			if bob.standing:
+				win.addch(bob.y,bob.x,bob.body,curses.color_pair(3))
+				win.addch(bob.y-1,bob.x,bob.head,curses.color_pair(4))
+			else:
+				win.addch(bob.y,bob.x,bob.body,curses.color_pair(3))
+				win.addch(bob.y-1,bob.x,bob.head,curses.color_pair(3))
 		except:
 			pass #Maybe put die call in here?
 		win.addch(ind.y,ind.x,ind.upperhalf)

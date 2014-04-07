@@ -27,7 +27,7 @@ class myThread(threading.Thread):
 		while display.notdead:
 			self.col.filtick()
 			#display.win.refresh()
-			time.sleep(0.3) #The time between each tick
+			time.sleep(2.7) #The time between each tick
 		return None
 
 	
@@ -55,7 +55,7 @@ class streamer(threading.Thread):
 			i.start()
 			newm.append(matrix.pop(matrix.index(i)))
 	#		colCounter.start()
-			time.sleep(0.2)
+			time.sleep(0.9)
 			
 class platthread(threading.Thread):
 	def __init__(self,index=0,threadID="plats"):
@@ -66,7 +66,7 @@ class platthread(threading.Thread):
 	def run(self):
 		while display.notdead:
 				plats[self.index].tick()
-				time.sleep(2)
+				time.sleep(1)
 		return None
 
 class updater(threading.Thread):
@@ -98,7 +98,7 @@ def init():
 			#c = random.randint(2,winx - 2)
 			#c = random.
 		c = random.choice(xpick)
-		platinstance = display.plat(xpick.pop(xpick.index(c)),(winy - 4),random.randint(1,5))
+		platinstance = display.plat(xpick.pop(xpick.index(c)),(winy - 4),random.randint(1,3))
 		plats.append(platinstance)
 		display.platlist.append((platinstance.y,platinstance.x))
 		display.platcases.append(platinstance)

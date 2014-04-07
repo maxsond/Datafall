@@ -9,7 +9,7 @@ import os
 def main():
 	display.levelbits()
 	display.intro()
-	#threadz.init()
+	threadz.init()
 	
 	while True:
 		if display.win.getch() == ord(' '):
